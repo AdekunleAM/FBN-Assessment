@@ -1,0 +1,34 @@
+{
+  "name": "api-automation-test",
+  "version": "1.0.0",
+  "description": "Playwright API test automation framework for the NovaWallet Transfer API",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test --project=api",
+    "auth-svc": "playwright test --grep @auth_svc",
+    "wallets-svc": "playwright test --grep @wallets_svc",
+    "transfers-svc": "playwright test --grep @transfers_svc",
+    "health-svc": "playwright test --grep @health_svc",
+    "idempotency": "playwright test --grep @idempotency",
+    "concurrency": "playwright test --grep @concurrency",
+    "security": "playwright test --grep @security",
+    "currency": "playwright test --grep @currency",
+    "e2e": "playwright test e2e",
+    "e2e:fund_transfer": "playwright test e2e --grep @fund_transfer",
+    "typecheck": "tsc --noEmit",
+    "report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "@types/qs": "^6.15.1",
+    "@types/validator": "^13.15.10",
+    "dotenv": "^18.0.8",
+    "qs": "^6.16.1",
+    "typescript": "^7.0.2",
+    "validator": "^13.15.35"
+  }
+}

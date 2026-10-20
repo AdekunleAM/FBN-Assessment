@@ -1,0 +1,6 @@
+{
+    "service": {
+        "tokenEnvVar": "API_TOKEN",
+        "invalidToken": "not-a-real-token-should-be-rejected"
+    }
+}

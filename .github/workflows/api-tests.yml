@@ -1,0 +1,80 @@
+name: NovaWallet API Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: |
+            nova-wallet-api/package-lock.json
+            api-automation-test/package-lock.json
+
+      - name: Install nova-wallet-api dependencies
+        working-directory: nova-wallet-api
+        run: npm ci
+
+      - name: Install api-automation-test dependencies
+        working-directory: api-automation-test
+        run: npm ci
+
+      - name: Typecheck test framework
+        working-directory: api-automation-test
+        run: npm run typecheck
+
+      - name: Build nova-wallet-api
+        working-directory: nova-wallet-api
+        run: npm run build
+
+      - name: Start nova-wallet-api
+        working-directory: nova-wallet-api
+        env:
+          API_TOKEN: novapay-dev-token
+        run: |
+          nohup npm run start > /tmp/nova-wallet-api.log 2>&1 &
+          echo $! > /tmp/nova-wallet-api.pid
+
+      - name: Wait for nova-wallet-api to become healthy
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/health > /dev/null; then
+              echo "nova-wallet-api is healthy after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "nova-wallet-api did not become healthy in time"
+          cat /tmp/nova-wallet-api.log
+          exit 1
+
+      - name: Run API test suite
+        working-directory: api-automation-test
+        env:
+          CI: true
+          API_BASE_URL: http://localhost:3000
+          API_TOKEN: novapay-dev-token
+        run: npm test
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: api-automation-test/playwright-report/
+          retention-days: 14
+
+      - name: Stop nova-wallet-api
+        if: always()
+        run: kill "$(cat /tmp/nova-wallet-api.pid)" 2>/dev/null || true

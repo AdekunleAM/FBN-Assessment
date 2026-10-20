@@ -1,0 +1,8 @@
+{
+    "nonExistentWalletId": "00000000-0000-0000-0000-000000000000",
+    "injectionPayloads": {
+        "sqlLike": "' OR '1'='1",
+        "sqlDrop": "'; DROP TABLE wallets; --",
+        "noSqlOperator": { "$gt": "" }
+    }
+}
